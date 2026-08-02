@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 
 const categories = [
@@ -7,6 +8,7 @@ const categories = [
   "Footwear",
   "Accessories",
   "Home & Living",
+  "Beauty",
 ];
 
 const prices = [
@@ -27,10 +29,17 @@ const ShopSidebar = ({
   setSelectedPrice,
   selectedSort,
   setSelectedSort,
+  mobile = false,
 }) => {
+  const [showAllCategories, setShowAllCategories] = useState(false);
+
   return (
-    <div className="w-72 hidden lg:block shrink-0">
-      <div className="sticky top-28">
+    <div
+      className={`${
+        mobile ? "w-full" : "hidden lg:block w-72 shrink-0"
+      }`}
+    >
+      <div className={mobile ? "" : "sticky top-28"}>
 
         {/* CATEGORY */}
         <h3 className="uppercase tracking-[5px] text-gray-500 dark:text-gray-400 font-semibold mb-8">
@@ -38,12 +47,18 @@ const ShopSidebar = ({
         </h3>
 
         <div className="flex flex-col gap-2">
-          {categories.map((category) => {
+          {(showAllCategories
+            ? categories
+            : categories.slice(0, 5)
+          ).map((category) => {
             const url =
               category === "All Products"
                 ? "/shop/all-products"
-                : `/shop/${category.toLowerCase().replace(/\s*&\s*/g, "-").replace(/\s+/g, "-")}`;
-            
+                : `/shop/${category
+                    .toLowerCase()
+                    .replace(/\s*&\s*/g, "-")
+                    .replace(/\s+/g, "-")}`;
+
             return (
               <NavLink key={category} to={url}>
                 {({ isActive }) => (
@@ -62,6 +77,15 @@ const ShopSidebar = ({
           })}
         </div>
 
+        {categories.length > 5 && (
+          <button
+            onClick={() => setShowAllCategories(!showAllCategories)}
+            className="mt-3 text-red-500 font-semibold hover:underline"
+          >
+            {showAllCategories ? "▲ Show Less" : "▼ Show More"}
+          </button>
+        )}
+
         {/* PRICE */}
         <div className="mt-16">
           <h3 className="uppercase tracking-[5px] text-gray-500 dark:text-gray-400 font-semibold mb-8">
@@ -73,9 +97,11 @@ const ShopSidebar = ({
               <button
                 key={price}
                 onClick={() =>
-                  setSelectedPrice(selectedPrice === price ? "" : price)
+                  setSelectedPrice(
+                    selectedPrice === price ? "" : price
+                  )
                 }
-                className={`text-left px-3 py-2 transition duration-300 ${
+                className={`text-left px-3 py-2 transition ${
                   selectedPrice === price
                     ? "text-red-500 font-semibold"
                     : "text-gray-600 dark:text-gray-400 hover:text-red-500"

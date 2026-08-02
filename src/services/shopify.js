@@ -752,3 +752,38 @@ export async function recoverCustomer(email) {
 
   return data.customerRecover;
 }
+
+export async function getNewArrivals() {
+  const query = `
+    query {
+      products(first: 6, sortKey: CREATED_AT, reverse: true) {
+        nodes {
+          id
+          title
+          handle
+          vendor
+
+          featuredImage {
+            url
+          }
+
+          priceRange {
+            minVariantPrice {
+              amount
+            }
+          }
+
+          variants(first: 1) {
+            nodes {
+              availableForSale
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const data = await shopifyFetch(query);
+
+  return data.products.nodes;
+}
