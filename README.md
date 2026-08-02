@@ -1,16 +1,75 @@
-# React + Vite
+# JVault
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern full-stack e-commerce web application built with React and Shopify Storefront API.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Modern responsive UI
+- Shopify Storefront API integration
+- Dynamic product collections
+- New Arrivals fetched from Shopify
+- Product search
+- Product filtering
+- Wishlist
+- Shopping cart
+- Dark mode
+- Product detail page
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React.js
+- Vite
+- Tailwind CSS
+- React Router
+- Shopify Storefront API
+- Shopify Developer Store
+- Git & GitHub
 
-## Expanding the ESLint configuration
+## Shopify Integration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+This project uses a **Shopify Developer Store** as the backend.
+
+Products, collections, prices, images, and inventory are managed through Shopify. The frontend fetches live product data using the Shopify Storefront GraphQL API.
+
+Adding a new product or collection in the Shopify Admin automatically updates the frontend without changing the React code.
+
+## Installation
+
+```bash
+git clone https://github.com/Codewithjasveer05/JVault.git
+
+cd JVault
+
+npm install
+
+npm run dev
+```
+
+## Environment Variables
+
+Create a `.env` file:
+
+```env
+VITE_SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
+VITE_SHOPIFY_STOREFRONT_TOKEN=your-storefront-token
+VITE_SHOPIFY_API_VERSION=2025-07
+```
+
+## Future Improvements
+
+- Customer Authentication
+- Checkout
+- Order History
+- Reviews & Ratings
+- Payment Gateway
+- Admin Dashboard
+
+## Live Demo
+
+Coming Soon
+
+## Author
+
+**Jasveer Singh**
+
+GitHub: https://github.com/Codewithjasveer05
