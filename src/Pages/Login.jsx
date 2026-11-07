@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { loginCustomer } from "../services/shopify.js";
 import { CustomerContext } from "../context/CustomerContext.jsx";
@@ -8,6 +8,8 @@ import toast from "react-hot-toast";
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from || "/";
   const { login } = useContext(CustomerContext);
 
   const [email, setEmail] = useState("");
@@ -35,7 +37,7 @@ const Login = () => {
         login(response.customerAccessToken.accessToken);
         toast.success("Login Successful!");
 
-        navigate("/");
+        navigate(redirectTo, { replace: true });
       }
     } catch (error) {
       console.error(error);
@@ -75,7 +77,9 @@ const Login = () => {
           </h2>
 
           <p className="text-gray-500 dark:text-gray-400 mt-2">
-            Enter your account details.
+            {location.state?.from
+              ? "Please login to add items to your cart."
+              : "Enter your account details."}
           </p>
 
           {/* Email */}
@@ -171,6 +175,7 @@ const Login = () => {
 
             <Link
               to="/register"
+              state={location.state}
               className="text-red-500 font-semibold ml-2"
             >
               Create Account

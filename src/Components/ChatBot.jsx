@@ -1,11 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRobot, FaTimes, FaPaperPlane } from "react-icons/fa";
-
-const GREETING = {
-  role: "assistant",
-  content: "Hi! 👋 I'm the JVault assistant. Ask me about products, prices, stock or shipping.",
-};
+import { CustomerContext } from "../context/CustomerContext.jsx";
 
 // Turns /product/handle into a "View product" link and **bold** into bold.
 function renderText(text) {
@@ -26,10 +22,22 @@ function renderText(text) {
 
 export default function ChatBot() {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState([GREETING]);
+  const { loggedIn, customer } = useContext(CustomerContext);
+  const firstName = loggedIn ? customer?.firstName : "";
+
+  const greeting = firstName
+    ? `Hi ${firstName}! 👋 Welcome back. Ask me about products, prices, stock or shipping.`
+    : "Hi! 👋 I'm the JVault assistant. Ask me about products, prices, stock or shipping. Login to add items to your cart.";
+
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
+
+  // New chat when a different person logs in or out
+  useEffect(() => {
+    setMessages([]);
+  }, [firstName]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -46,12 +54,10 @@ export default function ChatBot() {
     setLoading(true);
 
     try {
-      // Don't send the greeting to the model
-      const history = next.filter((m) => m !== GREETING);
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history }),
+        body: JSON.stringify({ messages: next, customerName: firstName || "" }),
       });
       const data = await res.json();
       setMessages([...next, { role: "assistant", content: data.reply || data.error || "Something went wrong." }]);
@@ -72,6 +78,12 @@ export default function ChatBot() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3 text-sm">
+            <div className="flex justify-start">
+              <div className="max-w-[85%] px-3 py-2 rounded-2xl rounded-bl-sm bg-gray-100 dark:bg-gray-800 text-black dark:text-white">
+                {greeting}
+              </div>
+            </div>
+
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[85%] px-3 py-2 rounded-2xl whitespace-pre-wrap ${

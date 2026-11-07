@@ -4,14 +4,14 @@ import { Link } from "react-router-dom";
 const ProductCard = ({ product }) => {
   return (
     <Link to={`/product/${product.handle}`} className="group block">
-      <div className="relative overflow-hidden rounded-3xl">
+      <div className="relative overflow-hidden rounded-3xl bg-white">
         <img
           src={
             product.featuredImage?.url ||
             "https://placehold.co/600x700?text=No+Image"
           }
           alt={product.title}
-          className="h-[340px] w-full object-cover duration-500 group-hover:scale-110"
+          className="h-[340px] w-full object-contain duration-500 group-hover:scale-105"
         />
 
         {/* Wishlist */}

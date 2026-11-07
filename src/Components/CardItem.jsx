@@ -17,7 +17,7 @@ const CartItem = ({
       <img
         src={item.merchandise.product.featuredImage.url}
         alt={item.merchandise.product.title}
-        className="w-40 h-40 rounded-2xl object-cover"
+        className="w-40 h-40 rounded-2xl object-contain bg-white"
       />
 
       {/* Product Info */}

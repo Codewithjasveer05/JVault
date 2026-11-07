@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   FiUser,
   FiMail,
@@ -26,6 +26,8 @@ const Register = () => {
   const { login } = useContext(CustomerContext);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from || "/";
 
   const handleRegister = async () => {
     setError("");
@@ -71,7 +73,7 @@ const Register = () => {
 
         login(loginResponse.customerAccessToken.accessToken);
 
-        navigate("/");
+        navigate(redirectTo, { replace: true });
       }
     } catch (error) {
       console.error("Register Error:", error);
@@ -235,6 +237,7 @@ const Register = () => {
             Already have an account?
             <Link
               to="/login"
+              state={location.state}
               className="text-red-500 font-semibold ml-2 hover:underline"
             >
               Login

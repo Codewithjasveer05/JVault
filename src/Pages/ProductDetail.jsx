@@ -1,8 +1,10 @@
 import { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import { WishlistContext } from "../context/WishlistContext";
 import { ShopifyCartContext } from "../context/ShopifyCartContext.jsx";
+import { CustomerContext } from "../context/CustomerContext.jsx";
 
 import {
   getProduct,
@@ -23,6 +25,9 @@ const ProductDetail = () => {
   const { handle } = useParams();
 
   const { setCart } = useContext(ShopifyCartContext);
+  const { loggedIn } = useContext(CustomerContext);
+  const navigate = useNavigate();
+  const location = useLocation();
   const { addToWishlist, isInWishlist } = useContext(WishlistContext);
 
   const [product, setProduct] = useState(null);
@@ -59,6 +64,13 @@ const ProductDetail = () => {
 
   const handleAddToCart = async () => {
     if (!inStock) return;
+
+    // Must be logged in to add to cart
+    if (!loggedIn) {
+      toast.error("Please login first to add items to your cart.");
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
 
     let cartId = localStorage.getItem("cartId");
 
@@ -115,12 +127,12 @@ const ProductDetail = () => {
 
         <div>
 
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-3xl overflow-hidden transition-colors duration-300">
+          <div className="bg-white rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-700 transition-colors duration-300">
 
             <img
               src={selectedImage}
               alt={product.title}
-              className="w-full h-[550px] object-cover"
+              className="w-full h-[350px] sm:h-[550px] object-contain"
             />
 
           </div>
@@ -132,7 +144,7 @@ const ProductDetail = () => {
               <button
                 key={image.url}
                 onClick={() => setSelectedImage(image.url)}
-                className={`rounded-2xl overflow-hidden border-2 transition ${
+                className={`rounded-2xl overflow-hidden bg-white border-2 transition ${
                   selectedImage === image.url
                     ? "border-red-500"
                     : "border-gray-200 dark:border-gray-700"
@@ -142,7 +154,7 @@ const ProductDetail = () => {
                 <img
                   src={image.url}
                   alt=""
-                  className="h-24 w-full object-cover"
+                  className="h-24 w-full object-contain"
                 />
 
               </button>

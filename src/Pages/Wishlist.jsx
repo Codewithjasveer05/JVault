@@ -59,7 +59,7 @@ const Wishlist = () => {
                 "https://placehold.co/500x500?text=No+Image"
               }
               alt={product.title}
-              className="w-full h-72 object-cover"
+              className="w-full h-72 object-contain bg-white"
             />
 
             <div className="p-5">

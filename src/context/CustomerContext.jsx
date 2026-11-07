@@ -3,9 +3,9 @@ import {getCustomer} from "../services/shopify.js"
 export const CustomerContext = createContext();
 
 const CustomerProvider = ({ children }) => {
-  const [customerToken, setCustomerToken] = useState(null);
+  const [customerToken, setCustomerToken] = useState(() => localStorage.getItem("customerToken"));
 
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(() => !!localStorage.getItem("customerToken"));
   const[customer, setCustomer] = useState(null)
 
   /* ------------------------------
@@ -77,4 +77,4 @@ const logout = () => {
   );
 };
 
-export default CustomerProvider; 
+export default CustomerProvider;

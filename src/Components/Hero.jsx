@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const Hero = () => {
   return (
     <section
@@ -28,14 +30,20 @@ const Hero = () => {
             that earn their place in your life.
           </p>
 
-          <div className="flex gap-5 mt-10">
-            <button className="bg-red-600 text-white px-8 py-4 rounded-full font-semibold hover:bg-red-700 transition">
+          <div className="flex flex-wrap gap-5 mt-10">
+            <Link
+              to="/shop"
+              className="bg-red-600 text-white px-8 py-4 rounded-full font-semibold hover:bg-red-700 transition"
+            >
               Shop Now →
-            </button>
+            </Link>
 
-            <button className="bg-white dark:bg-gray-800 text-black dark:text-white px-8 py-4 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+            <Link
+              to="/new"
+              className="bg-white dark:bg-gray-800 text-black dark:text-white px-8 py-4 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            >
               New Arrivals
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -73,4 +81,4 @@ const Hero = () => {
   );
 };
 
-export default Hero;
+export default Hero;  

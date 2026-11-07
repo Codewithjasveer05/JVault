@@ -18,7 +18,7 @@ app.use("/api/chat", (req, res, next) => {
 
 app.post("/api/chat", async (req, res) => {
   try {
-    const reply = await handleChat(req.body?.messages);
+    const reply = await handleChat(req.body?.messages, req.body?.customerName);
     res.json({ reply });
   } catch (e) {
     console.error("[bot] error:", e.message);

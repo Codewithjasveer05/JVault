@@ -787,3 +787,39 @@ export async function getNewArrivals() {
 
   return data.products.nodes;
 }
+
+/* ------------------------------------------
+   Link Cart To Logged-In Customer
+------------------------------------------ */
+
+export async function linkCartToCustomer(cartId, customerAccessToken) {
+  const query = `
+    mutation CartBuyerIdentityUpdate(
+      $cartId: ID!
+      $buyerIdentity: CartBuyerIdentityInput!
+    ) {
+      cartBuyerIdentityUpdate(
+        cartId: $cartId
+        buyerIdentity: $buyerIdentity
+      ) {
+        cart {
+          id
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const data = await shopifyFetch(query, {
+    cartId,
+    buyerIdentity: { customerAccessToken },
+  });
+
+  const errors = data?.cartBuyerIdentityUpdate?.userErrors;
+  if (errors?.length) console.warn("Link cart error:", errors);
+
+  return data?.cartBuyerIdentityUpdate?.cart || null;
+}

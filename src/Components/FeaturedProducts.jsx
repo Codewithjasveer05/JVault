@@ -1,9 +1,11 @@
 import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { FiHeart, FiShoppingBag } from "react-icons/fi";
 
 import { WishlistContext } from "../context/WishlistContext.jsx";
 import { ShopifyCartContext } from "../context/ShopifyCartContext.jsx";
+import { CustomerContext } from "../context/CustomerContext.jsx";
 import SkeletonCard from "./SkeletonCard.jsx";
 import {
   createCart,
@@ -13,6 +15,8 @@ import {
 const FeaturedProducts = ({ products, loading }) => {
   const { addToWishlist, isInWishlist } = useContext(WishlistContext);
   const { setCart } = useContext(ShopifyCartContext);
+  const { loggedIn } = useContext(CustomerContext);
+  const navigate = useNavigate();
 
   const [addedId, setAddedId] = useState(null);
   const [loadingId, setLoadingId] = useState(null);
@@ -33,6 +37,13 @@ const FeaturedProducts = ({ products, loading }) => {
     const variant = product.variants?.nodes?.[0];
 
     if (!variant || !variant.availableForSale) return;
+
+    // Must be logged in to add to cart
+    if (!loggedIn) {
+      toast.error("Please login first to add items to your cart.");
+      navigate("/login", { state: { from: "/" } });
+      return;
+    }
 
     setLoadingId(product.id);
 
@@ -98,7 +109,7 @@ const FeaturedProducts = ({ products, loading }) => {
                 <div key={item.id}>
 
                   {/* Image */}
-                  <div className="relative rounded-3xl overflow-hidden group">
+                  <div className="relative rounded-3xl overflow-hidden group bg-white">
 
                     <img
                       src={
@@ -106,7 +117,7 @@ const FeaturedProducts = ({ products, loading }) => {
                         "https://placehold.co/500x500?text=No+Image"
                       }
                       alt={item.title}
-                      className="h-[310px] w-full object-cover duration-500 group-hover:scale-110"
+                      className="h-[310px] w-full object-contain duration-500 group-hover:scale-105"
                     />
 
                     {/* Wishlist */}
