@@ -16,6 +16,7 @@ import ProtectedRoute from "./Components/ProtectedRoute";
 import ForgotPassword from "./Pages/ForgotPassword";
 import About from "./Pages/About";
 import ScrollToTop from "./Components/ScrollToTop";
+import ChatBot from "./Components/ChatBot";
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
       </main>
 
       <Footer />
+      <ChatBot />
     </div>
   );
 }
