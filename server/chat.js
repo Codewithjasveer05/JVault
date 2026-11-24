@@ -2,9 +2,9 @@
 
 const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 
-const MAIN_MODEL = process.env.NVIDIA_MODEL || "google/diffusiongemma-26b-a4b-it";
+const MAIN_MODEL = process.env.NVIDIA_MODEL || "nvidia/nemotron-3.5-bolt-e4b";
 // Backups are only used if the main model fails. Comma separated in .env if you want to change.
-const BACKUP_MODELS = (process.env.NVIDIA_BACKUP_MODELS || "deepseek-ai/deepseek-v4.1-flash")
+const BACKUP_MODELS = (process.env.NVIDIA_BACKUP_MODELS || "minimaxai/minimax-m3.1-flash")
   .split(",").map((m) => m.trim()).filter(Boolean);
 
 const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "our support team";
@@ -62,7 +62,7 @@ const SHOP_QUERY = `
 let cache = { text: "", at: 0 };
 const CACHE_MS = 5 * 60 * 1000; // refresh store data every 5 minutes
 
-const clip = (s = "", n = 200) => s.replace(/\s+/g, " ").trim().slice(0, n);
+const clip = (s, n = 200) => (s ?? "").replace(/\s+/g, " ").trim().slice(0, n);
 
 async function loadStoreKnowledge() {
   if (cache.text && Date.now() - cache.at < CACHE_MS) return cache.text;
@@ -166,23 +166,78 @@ async function callModel(model, messages, timeoutMs) {
   }
 }
 
-// Main model (retry once), then backups.
+// ---------- Self-healing model picker ----------
+// NVIDIA retires free models often. If your models stop working, the bot asks NVIDIA which
+// models are alive, tests a few, and uses the first one that answers. No manual fixing needed.
+const deadModels = new Set();   // models NVIDIA said are gone (410/404): never try again until restart
+let discovered = [];            // working models found automatically
+let lastDiscover = 0;
+
+const NOT_CHAT = /embed|rerank|vision|vlm|clip|asr|tts|speech|guard|safety|parse|retriev|image|diffusion|reward|bge|riva|cosmos|video|ocr|translate|nv-/i;
+const FAST = /flash|bolt|nano|mini|small|lite|e4b|8b|12b/i;
+
+async function discoverModels() {
+  if (Date.now() - lastDiscover < 2 * 60 * 1000) return discovered; // scan at most every 2 minutes
+  lastDiscover = Date.now();
+  try {
+    const res = await fetch("https://integrate.api.nvidia.com/v1/models", {
+      headers: { Authorization: `Bearer ${process.env.NVIDIA_API_KEY}` },
+    });
+    if (!res.ok) throw new Error(`/models ${res.status}`);
+    const ids = ((await res.json()).data || [])
+      .map((m) => m.id)
+      .filter((id) => id && !NOT_CHAT.test(id) && !deadModels.has(id))
+      .sort((a, b) => Number(FAST.test(b)) - Number(FAST.test(a)))
+      .slice(0, 12);
+    const probe = [{ role: "user", content: "Say hi in one word." }];
+    const results = await Promise.all(
+      ids.map((m) => callModel(m, probe, 8000).then(() => m).catch(() => null))
+    );
+    discovered = results.filter(Boolean);
+    console.log("[bot] auto-found working models:", discovered.join(", ") || "(none)");
+  } catch (e) {
+    console.warn("[bot] model discovery failed:", e.message);
+  }
+  return discovered;
+}
+
+async function tryModel(model, messages, ms) {
+  try {
+    return await callModel(model, messages, ms);
+  } catch (e) {
+    if (/NVIDIA (410|404)/.test(e.message)) deadModels.add(model); // retired: skip it from now on
+    console.warn(`[bot] ${model} failed:`, e.message);
+    throw e;
+  }
+}
+
 async function askWithFallback(messages) {
-  const plan = [
-    [MAIN_MODEL, 20000],
-    [MAIN_MODEL, 20000],
-    ...BACKUP_MODELS.map((m) => [m, 15000]),
-  ];
   let lastErr;
-  for (const [model, ms] of plan) {
+  const configured = [MAIN_MODEL, ...BACKUP_MODELS];
+
+  // 1) Models from .env, then models found earlier
+  for (const model of [...new Set([...configured, ...discovered])]) {
+    if (deadModels.has(model)) continue;
     try {
-      return await callModel(model, messages, ms);
+      return await tryModel(model, messages, 20000);
     } catch (e) {
       lastErr = e;
-      console.warn(`[bot] ${model} failed:`, e.message);
     }
   }
-  throw lastErr;
+
+  // 2) Everything failed: find working models automatically and try them
+  const found = await discoverModels();
+  for (const model of found) {
+    if (deadModels.has(model)) continue;
+    try {
+      const text = await tryModel(model, messages, 20000);
+      console.log(`[bot] Switched to ${model}. Put NVIDIA_MODEL=${model} in .env to make it permanent.`);
+      return text;
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error("No working model found");
 }
 
 /* ---------------- Fix messy links in the reply ---------------- */
