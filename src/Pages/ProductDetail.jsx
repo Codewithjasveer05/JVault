@@ -19,6 +19,7 @@ import {
   FiRefreshCw,
   FiShield,
   FiStar,
+  FiArrowLeft,
 } from "react-icons/fi";
 
 const ProductDetail = () => {
@@ -120,6 +121,16 @@ const ProductDetail = () => {
 
   return (
     <section className="max-w-7xl mx-auto px-4 md:px-6 pt-28 md:pt-32 pb-20 bg-white dark:bg-gray-900 transition-colors duration-300">
+
+      {/* BACK BUTTON */}
+      <button
+        type="button"
+        onClick={() => (location.key !== "default" ? navigate(-1) : navigate("/shop"))}
+        className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors duration-300"
+      >
+        <FiArrowLeft size={18} />
+        <span className="font-medium">Back</span>
+      </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
 
